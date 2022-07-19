@@ -21,6 +21,7 @@
 在 5 FPS 到 160 FPS 的范围内，YOLOv7 在 speed 和  accuracy 上都超过了所有已知的目标检测器，并且在 GPU V100 上 30 FPS 或更高的实时目标检测器中，YOLOv7 有最高的 56.8% AP的 accuracy。YOLOv7-E6 目标检测器( 56FPS V100，55.9%AP ) 比基于  transformer 的检测器 SWINL Cascade-MASK R-CNN(9.2 FPS A100，53.9%AP)  的 speed 快 509%， accuracy 高2%；比基于卷积的检测器 ConvNeXt-XL Cascade-MASK R-CNN(8.6 FPS A100，55.2%AP) speed 快 551%， accuracy 高 0.7%；YOLOv7性能优于：YOLOR、YOLOX、Scaled-YOLOv4、YOLOv5、DETR、 Deformable DETR、Dino-5Scale-R50、R50VIT-Adapter-B 和许多其他目标检测器的 speed 和 accuracy。此外，我们仅在MS Coco数据集上从头开始训练YOLOv7，而不使用任何其他数据集或预训练的权重。  
 
 <img src="yolov7_imgs/图1.png"/>
+
 图 1：与其他实时目标检测器的比较，我们提出的方法实现了最先进的性能。
 
 ## 6. 结论
@@ -75,6 +76,7 @@
 ### 3.1. 扩展的高效层聚合网络
 
 <img src="yolov7_imgs/图2.png"/>
+
 图2：扩展的高效层聚合网络。提出的 extended ELAN (E-ELAN) 完全不改变原架构的梯度传输路径，而是利用分组卷积来增加所增加特征的基数（cardinality），并将不同分组的特征以一个 shuffle 和  merge 基数的方式组合在一起。这种操作方式可以增强不同特征图学习的特征，提高参数和计算的使用。 
 
 在大多数关于设计高效架构的文献中，主要的考虑是不超过 参数的数量、计算量和计算密度。从存储器访问成本的特点出发，Ma等人提出了一种新的解决方案。[55]分析了输入输出通道比、架构分支数、 element-wise 运算对网络推理速度的影响。 Doll ́ar等人[15]此外，还考虑了在执行模型缩放时的 activation，即更多地考虑卷积层输出张量中的元素数量。图2(B)中的CSPVoVNet[79]设计是VoVNet[39]的变体。除了考虑上述基本设计问题外，CSPVoVNet[79]的架构还分析了梯度路径，以便使不同层的权重学习更多样化的特征。上述梯度分析方法使推断更快、更 accurate。图2(C)中的Elan[1]考虑了以下设计策略：“如何设计一个高效的网络？”他们得出一个结论：通过控制最短最长的梯度路径，一个更深的网络可以有效地学习和收敛。在本文中，我们提出了基于ELAN的 Extended-ELAN (E-ELAN)，其主要结构如图2(D)所示。
@@ -146,6 +148,7 @@ RepConv实际上是在一个卷积层中结合了 3 × 3卷积、1 × 1卷积和
 ### 5.3.与 state-of-the-arts的比较
 
 表2:最先进的实时目标检测器的比较。
+
 <img src="yolov7_imgs/表2.png"/>
 
 > 我们的  FLOPs 是按矩形输入分辨率计算的，如640×640或1280×1280。 
@@ -159,6 +162,7 @@ RepConv实际上是在一个卷积层中结合了 3 × 3卷积、1 × 1卷积和
 ### 5.4.1提出的复合 scaling 方法
 
 表3：提出的模型 scaling下的消融研究
+
 <img src="yolov7_imgs/表3.png"/>
 
 表3显示了使用不同的模型缩放策略进行 scaling up 时所获得的结果。其中，我们提出的复合scaling 方法是将 computational 块的深度放大1.5倍，将 transition 块的宽度放大1.25倍。如果与仅放大宽度的方法相比，我们的方法可以以更少的参数和计算量提高AP 0.5%。如果与仅放大深度的方法相比，我们的方法只需要增加2.9%的参数和1.2%的计算量，可以提高AP 0.2%。从表3的结果可以看出，我们提出的复合缩放策略可以更有效地利用参数和计算。
@@ -169,17 +173,21 @@ RepConv实际上是在一个卷积层中结合了 3 × 3卷积、1 × 1卷积和
 在基于 concatenation 模型的实验中，我们用 RepConv 替换了3层 ELAN 中不同位置的 3×3卷积层，具体配置如图6所示。从表4所示的结果可以看出，我们提出的 planned re-parameterized 模型上存在所有较高的AP值。
 
 <img src="yolov7_imgs/图6.png"/>
+
 图6： Planned RepConv 3-stacked ELAN。蓝色圆圈是我们用 RepConv 替换Conv的位置。
 
 表4：Planned  RepConcatenation 模型的消融研究。
+
 <img src="yolov7_imgs/表4.png"/>
 
 在基于残差模型的实验中，由于原始的黑暗块没有一个符合我们设计策略的3 × 3卷积块，所以我们为实验额外设计了一个反向的黑暗块，其架构如图7所示。由于带有暗块和反向暗块的CSPDarknet 具有完全相同的参数和操作量，所以比较是公平的。表5所示的实验结果充分证明了所提出的 planned re-parameterized 模型对基于残差的模型同样有效。我们发现RepCSPResNet[85]的设计也符合我们的设计模式。
 
 <img src="yolov7_imgs/图7.png"/>
+
 图7：反向 CSPDarknet。我们颠倒了暗块中1×1和3×3卷积层的位置，以符合我们 planned reparameterized 模型设计策略。
 
 表5： planned RepResidual 模型的消融研究。
+
 <img src="yolov7_imgs/表5.png"/>
 
 ### 5.4.3 提出的 auxiliary head 的 assistant loss
@@ -187,16 +195,19 @@ RepConv实际上是在一个卷积层中结合了 3 × 3卷积、1 × 1卷积和
 在  auxiliary head  assistant loss 实验中，我们比较了一般的 lead head 和  auxiliary head 的独立标签分配方法，并对两种提出的 lead 指导标签分配方法进行了比较。我们在表6中显示了所有比较结果。从表6中列出的结果可以清楚地看出，任何增加 assistant loss 的模型都可以显著提高整体性能。此外，我们提出的 lead 指导标签分配策略在 AP、AP50和AP75 上获得了比一般独立标签分配策略更好的性能。至于我们提出的 coarse for assistant 和 fine for lead label assignment strategy，它在所有情况下都会得到最好的结果。在图8中，我们展示了不同方法在 auxiliary head 和 lead head 预测的对象图。从图8中我们发现，如果 auxiliary head 学习 lead guided soft label，确实有助于 lead head 从一致的目标中提取残留信息。
 
 表6:提出的auxiliary head 的消融研究。
+
 <img src="yolov7_imgs/表5.png"/>
 
 在表7中，我们进一步分析了所提出的coarse-to-fine lead guided 标签分配方法对 auxiliary head 解码器的影响。也就是说，我们比较了引入上界约束和不引入上界约束的结果。从表中的数字来看，用距离目标中心的距离来约束目标的上限的方法可以获得更好的性能。
 
 表7:约束 auxiliary head 的消融研究。
+
 <img src="yolov7_imgs/表7.png"/>
 
 由于提出的 YOLOv7 使用多个金字塔来共同预测目标检测结果，我们可以直接将 auxiliary head 连接到中间层的金字塔进行训练。这种类型的训练可以弥补在下一级金字塔预测中可能丢失的信息。基于上述原因，我们在提出的 E-ELAN 架构中设计了部分 auxiliary head。我们的方法是在合并基数（cardinality）之前，在一组特征图后连接 auxiliary head ，这种连接可以使新生成的特征图 set 的权值不被 assistant loss 直接更新。我们的设计允许每个 lead head 金字塔仍然从不同大小的目标中获取信息。表8显示了两种不同方法的结果，即  coarse-to-fine lead guided 方法 和 partial coarse-to-fine lead guided 方法。显然， partial coarse-to-fine lead guided 方法具有较好的 auxiliary 效果。
 
 表8： partial auxiliary head 的消融研究。
+
 <img src="yolov7_imgs/表8.png"/>
 
 ## 8. 更多的比较
@@ -206,18 +217,23 @@ YOLOv7 在 5 FPS到160 FPS的速度和 accuracy 上超过了所有已知的目�
 在COCO数据集上，YOLOv7-E6E(56.8%AP)实时模型的最大 accuracy 比目前最 accurate 的 meituan/YOLOv6-s model (43.1% AP)高+13.7%AP。我们的  YOLOv7-tiny (35.2%AP，0.4ms)模型在相同条件下，在COCO数据集和 batch=32 的V100 GPU上，比 meituan/YOLOv6-n(35.0%AP，0.5ms)快+25%和+0.2%AP。
 
 表9：更多比较( (batch=1, no-TRT，无需额外的目标检测训练数据)
+
 <img src="yolov7_imgs/表9.png"/>
 
 <img src="yolov7_imgs/图9.png"/>
+
 图9：与其他目标检测器的比较。
 
 <img src="yolov7_imgs/图10.png"/>
+
 图10：与其他实时目标检测器的比较。
 
 表10：不同设置的比较。
+
 <img src="yolov7_imgs/表10.png"/>
 
 > 与 meituan/YOLOv6 和PPYOLOE类似，当设置较高的IOU阈值时，我们的模型可以获得更高的AP。
 
 <img src="yolov7_imgs/图11.png"/>
+
 图11：与其他实时目标探测器的比较。
